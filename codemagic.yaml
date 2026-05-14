@@ -1,0 +1,62 @@
+workflows:
+
+  # ── Android (APK) ────────────────────────────────────────────────────────────
+  android-release:
+    name: Android Release APK
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      java: 17
+    scripts:
+      - name: Instalar dependencias
+        script: flutter pub get
+      - name: Compilar APK release
+        script: flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+    publishing:
+      email:
+        recipients:
+          - vasqueyunior6@gmail.com  # ← tu correo
+        notify:
+          success: true
+          failure: true
+
+  # ── iOS (IPA) ─────────────────────────────────────────────────────────────────
+  ios-release:
+    name: iOS Release IPA
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      # Certificados y perfil — se suben en Codemagic > App settings > Environment variables
+      # Necesitas: CM_CERTIFICATE, CM_CERTIFICATE_PASSWORD, CM_PROVISIONING_PROFILE
+      ios_signing:
+        distribution_type: app_store   # o: ad_hoc (para pruebas sin App Store)
+        bundle_identifier: com.geapp.app  # ← debe coincidir con tu Bundle ID en Apple
+    scripts:
+      - name: Instalar dependencias Flutter
+        script: flutter pub get
+      - name: Instalar pods iOS
+        script: |
+          cd ios
+          pod install
+      - name: Compilar IPA
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - vasqueyunior6@gmail.com  # ← tu correo
+        notify:
+          success: true
+          failure: true
+      # Descomenta para subir directo a TestFlight:
+      # app_store_connect:
+      #   api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+      #   key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+      #   issuer_id: $APP_STORE_CONNECT_ISSUER_ID
