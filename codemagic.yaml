@@ -22,19 +22,16 @@ workflows:
           success: true
           failure: true
 
-  # ── iOS (IPA) ─────────────────────────────────────────────────────────────────
+  # ── iOS (sin firma — verifica que el código compila) ─────────────────────────
+  # Para generar un IPA instalable necesitas una cuenta Apple Developer ($99/año)
+  # y subir el certificado en: Codemagic > App settings > Code signing > iOS
   ios-release:
-    name: iOS Release IPA
+    name: iOS Build (sin firma)
     max_build_duration: 60
     environment:
       flutter: stable
       xcode: latest
       cocoapods: default
-      # Certificados y perfil — se suben en Codemagic > App settings > Environment variables
-      # Necesitas: CM_CERTIFICATE, CM_CERTIFICATE_PASSWORD, CM_PROVISIONING_PROFILE
-      ios_signing:
-        distribution_type: app_store   # o: ad_hoc (para pruebas sin App Store)
-        bundle_identifier: com.geapp.app  # ← debe coincidir con tu Bundle ID en Apple
     scripts:
       - name: Instalar dependencias Flutter
         script: flutter pub get
@@ -42,21 +39,14 @@ workflows:
         script: |
           cd ios
           pod install
-      - name: Compilar IPA
-        script: |
-          flutter build ipa --release \
-            --export-options-plist=/Users/builder/export_options.plist
+      - name: Compilar iOS sin firma
+        script: flutter build ios --release --no-codesign
     artifacts:
-      - build/ios/ipa/*.ipa
+      - build/ios/iphoneos/Runner.app
     publishing:
       email:
         recipients:
-          - vasqueyunior6@gmail.com  # ← tu correo
+          - vasqueyunior6@gmail.com
         notify:
           success: true
           failure: true
-      # Descomenta para subir directo a TestFlight:
-      # app_store_connect:
-      #   api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-      #   key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-      #   issuer_id: $APP_STORE_CONNECT_ISSUER_ID
