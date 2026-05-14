@@ -1,6 +1,7 @@
 class ApiConfig {
-  // ── Cambia esta URL por la dirección de tu servidor ──────────────────────────
+  // ── URL local (misma red Wi-Fi) ───────────────────────────────────────────────
   static const String baseUrl = 'http://192.168.1.197:9404';
+
 
   // Endpoints
   static const String login               = '$baseUrl/api/Usuario/login';
